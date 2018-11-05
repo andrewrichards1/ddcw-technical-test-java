@@ -1,4 +1,4 @@
-name := """ddcw-technical-test-frontend-java""""
+name := """ddcw-technical-test-java""""
 
 version := "2.6.x"
 
@@ -18,4 +18,4 @@ testOptions in Test := Seq(Tests.Argument(TestFrameworks.JUnit, "-a", "-v"))
 
 libraryDependencies ++= compileDeps
 
-PlayKeys.playDefaultPort := 1234
+PlayKeys.playDefaultPort := 1235

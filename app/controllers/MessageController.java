@@ -1,45 +1,37 @@
 package controllers;
 
-import connectors.BackendConnector;
-import forms.MessageInputForm;
-import play.data.Form;
-import play.data.FormFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import model.MessageInput;
+import play.libs.Json;
+import play.mvc.Controller;
 import play.mvc.Result;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import static play.mvc.Results.ok;
+
+import services.MessageService;
+import utils.RestUtils;
 import play.Logger;
 
+
 @Singleton
-public class MessageController {
-
-    private final Form<MessageInputForm> form;
-
+public class MessageController extends Controller {
 
     @Inject
-    public MessageController(FormFactory formFactory) {
-        this.form = formFactory.form(MessageInputForm.class);
-    }
+    private MessageService messageService;
 
-    public Result submitMessage() {
-
-        Logger.debug("submit message");
-        final Form<MessageInputForm> boundForm = form.bindFromRequest();
-
-        if (boundForm.hasErrors()) {
-            play.Logger.ALogger logger = play.Logger.of(getClass());
-            logger.error("errors = {}", boundForm.errors());
-            return ok(views.html.homepage.render(form));
-        } else {
-            MessageInputForm data = boundForm.get();
-            BackendConnector.sendMessage(data.getMessage());
-            return ok(views.html.homepage.render(form));
+    public Result printMessage() {
+        JsonNode json = request().body().asJson();
+        if (json == null) {
+            return badRequest(RestUtils.createResponse(
+                    "Expecting Json data", false));
         }
+        MessageInput input = (MessageInput) Json.fromJson(json, MessageInput.class);
+        Logger.debug("Got " + input.getMessage());
+
+
+        return ok(messageService.logToTerminal(input));
     }
 
 
-
-    public Result getHomepage() {
-        return ok(views.html.homepage.render(form));
-    }
 }
